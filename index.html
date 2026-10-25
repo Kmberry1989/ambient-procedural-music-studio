@@ -165,6 +165,39 @@ body.focusLock{overflow:hidden}
 .pbtns{display:flex;gap:4px;justify-content:center;margin-top:6px}
 .pbtns button{width:30px;height:26px;border-radius:8px;border:1px solid var(--line);background:var(--chip);color:var(--ink);font-size:15px;cursor:pointer;line-height:1}
 .elemRow{margin-bottom:13px}
+/* gesture loops — tap-your-own-loop pads */
+.gesPad{height:200px;border-radius:14px;background-color:var(--track);background-image:repeating-linear-gradient(to bottom, transparent 0, transparent calc(100%/10 - 1px), var(--line) calc(100%/10 - 1px), var(--line) calc(100%/10));border:1px solid var(--line);position:relative;touch-action:none;overflow:hidden;cursor:pointer}
+.gesPad .plab{position:absolute;font-size:10px;letter-spacing:.1em;color:var(--muted);z-index:1;pointer-events:none}
+.gesRipple{position:absolute;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;border:2px solid var(--accent);background:rgba(230,178,92,.18);pointer-events:none;animation:gesRip .55s ease-out forwards;z-index:2}
+@keyframes gesRip{from{transform:scale(.45);opacity:.95}to{transform:scale(1.25);opacity:0}}
+@media (prefers-reduced-motion: reduce){.gesRipple{animation:none;opacity:0}}
+.gesDrums{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.gesDrum{height:92px;border-radius:14px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font-size:14px;font-weight:800;cursor:pointer;touch-action:none}
+.gesDrum.hit{background:var(--accent);color:#1a1408;border-color:var(--accent)}
+.gesStrip{display:grid;grid-template-columns:repeat(16,1fr);gap:4px;margin-top:10px}
+.gesCell{height:22px;border-radius:6px;border:1px solid var(--line);background:var(--track)}
+.gesCell.has{background:var(--accent2);border-color:var(--accent2)}
+.gesCell.has.bass{background:var(--accent3);border-color:var(--accent3)}
+.gesCell.now{outline:2px solid var(--accent);outline-offset:1px}
+.toolrow button.recording{background:#c0392b;color:#fff;border-color:#c0392b}
+/* hum-a-loop microphone readout */
+.humMeter{height:14px;background:var(--track);border:1px solid var(--line);border-radius:99px;overflow:hidden}
+.humFill{height:100%;width:0%;background:var(--accent2);transition:width .07s linear}
+.humNote{font-size:36px;font-weight:800;min-width:88px;text-align:center}
+/* performance recorder in the transport */
+.recCluster{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.recBtn{border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer}
+.recBtn.recording{background:#c0392b;color:#fff;border-color:#c0392b}
+.recdot{width:10px;height:10px;border-radius:50%;background:#c0392b;display:none;flex:none}
+.recdot.on{display:inline-block;animation:pendPulse 1.1s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.recdot.on{animation:none}}
+.recWaveWrap{flex:1 1 100%;margin-top:4px}
+#recWave{width:100%;height:56px;display:block;background:var(--track);border:1px solid var(--line);border-radius:12px}
+.recWaveLab{font-size:11px;color:var(--muted);margin-top:5px;letter-spacing:.06em;text-transform:uppercase}
+.recWarn{display:none;background:#c0392b;color:#fff;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:800;letter-spacing:.02em}
+.recWarn.on{display:inline-block;animation:pendPulse 1.1s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.recWarn.on{animation:none}}
+#recWave.hot{border-color:#e5484d;box-shadow:0 0 0 2px rgba(229,72,77,.35)}
 footer{color:var(--muted);font-size:12px;line-height:1.6;margin-top:14px}
 .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:9px 14px;border-radius:999px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:20;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -203,6 +236,17 @@ footer{color:var(--muted);font-size:12px;line-height:1.6;margin-top:14px}
       </div>
     </div>
     <label class="vol">Master <input type="range" id="masterVol" min="0" max="100" value="78"></label>
+    <div class="recCluster">
+      <button class="recBtn" id="recBtn">● Record performance</button>
+      <span class="recdot" id="recDot"></span>
+      <span class="mono" id="recTime" style="font-size:12px"></span>
+      <span class="recWarn" id="recWarn">TOO LOUD — clipping · turn the mix down</span>
+      <a class="recBtn" id="recDownload" style="display:none;text-decoration:none"></a>
+    </div>
+    <div class="recWaveWrap" id="recWaveWrap" style="display:none">
+      <canvas id="recWave" width="1040" height="128"></canvas>
+      <div class="recWaveLab" id="recWaveLab">Recording — live waveform</div>
+    </div>
   </section>
 
   <section class="card">
@@ -226,6 +270,50 @@ footer{color:var(--muted);font-size:12px;line-height:1.6;margin-top:14px}
         <div class="hint">Pad, melody, bass and air also keep their own mixer volumes per template — set them on the mixing board and the template remembers.</div>
       </div>
     </div>
+  </section>
+
+  <section class="card">
+    <h2>Gesture loops — tap the music in <span id="gesPresetName">Drift</span></h2>
+    <div class="hint" style="margin:0 0 12px">Templates don't have to arrive ready-made. Pick an instrument, press <b>● Record</b> and <b>tap the pad in time with the loop</b> — high on the pad is a high note, low is a low note. Your taps become that instrument's loop for <b>this template</b>, replacing the part the engine would have improvised. Hold and drag for a glissando run. Drum taps write straight into the drum machine's steps below. Every template keeps its own loops.</div>
+    <div class="seg" id="gesInstSeg" style="margin-bottom:10px">
+      <button data-i="melody" class="active">♪ Melody pad</button><button data-i="bass">Bass pad</button><button data-i="drums">Drum pads</button>
+    </div>
+    <div class="gesPad" id="gesPad">
+      <span class="plab" style="top:8px;left:10px">HIGH ↑</span>
+      <span class="plab" style="bottom:8px;left:10px">LOW ↓</span>
+      <span class="plab mono" id="gesPadRead" style="top:8px;right:10px">tap to play</span>
+    </div>
+    <div class="gesDrums" id="gesDrums" style="display:none">
+      <button class="gesDrum" data-d="kick">Kick</button><button class="gesDrum" data-d="snare">Snare</button><button class="gesDrum" data-d="hat">Hat</button><button class="gesDrum" data-d="perc">Perc</button>
+    </div>
+    <div class="gesStrip" id="gesStrip" aria-hidden="true"></div>
+    <div class="toolrow">
+      <button id="gesRec">● Record</button>
+      <button id="gesUse">Use my loop: Off</button>
+      <button id="gesQuant" class="active">Quantize: On</button>
+      <button id="gesClear">Clear loop</button>
+      <button id="gesBlank">Start this template blank</button>
+    </div>
+    <div class="hint" id="gesRead">Melody loop: empty — the engine improvises this part.</div>
+    <div class="hint">The strip shows your loop across its 16 steps and lights up as it plays. <b>Quantize on</b> snaps taps to the nearest step; off keeps your exact timing inside the step. “Start this template blank” silences the ready-made parts (improvised melody, drum pattern, piano roll) so the template is only chords plus whatever you tap in.</div>
+  </section>
+
+  <section class="card">
+    <h2>Hum a loop — your voice becomes the melody <span id="humStatus">Mic off</span></h2>
+    <div class="hint" style="margin:0 0 12px">Hum, sing, whistle, or play any sound into your microphone. The studio listens for pitch and volume, <b>snaps what it hears to the current key &amp; scale</b>, and plays it back as a soft instrument voice. With writing on, each steady note you hum is placed into <b>this template's melody loop</b> — the same loop the Melody pad writes — so a hummed line becomes the template's melody. The mic is <b>opt-in only</b>, never starts by itself, and is analysed on this device only: nothing is recorded or sent anywhere.</div>
+    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+      <div class="humNote mono" id="humNote">—</div>
+      <div style="flex:1;min-width:180px">
+        <div class="humMeter"><div class="humFill" id="humFill"></div></div>
+        <div class="hint mono" id="humRead" style="margin-top:6px">Microphone is off</div>
+      </div>
+    </div>
+    <div class="toolrow">
+      <button id="humStart">Start microphone</button><button id="humStop">Stop</button>
+      <button id="humLive" class="active">Hum voice: On</button>
+      <button id="humRec" class="active">Write hum into melody loop: On</button>
+    </div>
+    <div class="hint" id="humMsg">Tip: press Play first so written notes land in the loop you're hearing — each new steady note is placed on the step playing at that moment. If the mic is denied, the touch pads above still write loops.</div>
   </section>
 
   <div class="board">
@@ -370,7 +458,7 @@ function anySolo(){return Object.keys(state.solo).some(function(k){return state.
 function effMix(k){ if(state.mute[k]) return 0; if(anySolo()&&!state.solo[k]) return 0; return state.mix[k]||0; }
 
 /* ---------- audio graph ---------- */
-var ctx=null,master,analyser,eqLow,eqMid,eqHigh,padGain,melGain,bassGain,airGain,drumGain,rollGain,therGain,therOsc,therFilter,delaySend,delayNode,delayFb,verbSend,verb,padFilter,airSrc,airFilter;
+var ctx=null,master,analyser,eqLow,eqMid,eqHigh,padGain,melGain,bassGain,airGain,drumGain,rollGain,therGain,therOsc,therFilter,delaySend,delayNode,delayFb,verbSend,verb,padFilter,airSrc,airFilter,humOsc,humOsc2,humGain,humFilter;
 function midiHz(m){return 440*Math.pow(2,(m-69)/12);}
 function buildAudio(){
   ctx=new (window.AudioContext||window.webkitAudioContext)();
@@ -393,6 +481,11 @@ function buildAudio(){
   therFilter=ctx.createBiquadFilter(); therFilter.type="lowpass"; therFilter.frequency.value=2400;
   therGain=ctx.createGain(); therGain.gain.value=0; therFilter.connect(therGain); therGain.connect(eqLow);
   therOsc=ctx.createOscillator(); therOsc.type="sine"; therOsc.frequency.value=440; therOsc.connect(therFilter); therOsc.start();
+  /* hum voice — driven live by the microphone pitch tracker, silent until you hum */
+  humFilter=ctx.createBiquadFilter(); humFilter.type="lowpass"; humFilter.frequency.value=1900;
+  humGain=ctx.createGain(); humGain.gain.value=0; humFilter.connect(humGain); humGain.connect(melGain);
+  humOsc=ctx.createOscillator(); humOsc.type="sine"; humOsc.frequency.value=440; humOsc.connect(humFilter); humOsc.start();
+  humOsc2=ctx.createOscillator(); humOsc2.type="triangle"; humOsc2.frequency.value=880; var hg2=ctx.createGain(); hg2.gain.value=.12; humOsc2.connect(hg2); hg2.connect(humFilter); humOsc2.start();
   /* echo */
   delayNode=ctx.createDelay(2); delayFb=ctx.createGain(); var dFil=ctx.createBiquadFilter(); dFil.type="lowpass"; dFil.frequency.value=2200;
   delayNode.connect(dFil); dFil.connect(delayFb); delayFb.connect(delayNode);
@@ -405,10 +498,25 @@ function buildAudio(){
   verbSend=ctx.createGain(); verbSend.connect(verb);
   if(rollGain){ rollGain.connect(delaySend); rollGain.connect(verbSend); }
   if(therGain){ therGain.connect(delaySend); therGain.connect(verbSend); }
+  if(humGain){ humGain.connect(delaySend); humGain.connect(verbSend); }
   /* air / texture: looped filtered noise, very soft */
   var nLen=ctx.sampleRate*3, nBuf=ctx.createBuffer(1,nLen,ctx.sampleRate), nd=nBuf.getChannelData(0), last=0;
   for(var j=0;j<nLen;j++){var w=Math.random()*2-1; last=(last+.02*w)/1.02; nd[j]=last*3.2;}
   airSrc=ctx.createBufferSource(); airSrc.buffer=nBuf; airSrc.loop=true; airSrc.connect(airFilter);
+  /* performance-recorder tap: a parallel feed off the analyser, returned through a
+     zero-gain node so the live sound the player hears is completely untouched */
+  try{
+    recNode=ctx.createScriptProcessor(4096,2,2);
+    var recMute=ctx.createGain(); recMute.gain.value=0;
+    analyser.connect(recNode); recNode.connect(recMute); recMute.connect(ctx.destination);
+    recNode.onaudioprocess=function(e){
+      if(!recActive||recMode!=="wav") return;
+      var l=e.inputBuffer.getChannelData(0), r=e.inputBuffer.numberOfChannels>1? e.inputBuffer.getChannelData(1):l;
+      recChunksL.push(l.slice()); recChunksR.push(r.slice());
+      var pk=0; for(var i=0;i<l.length;i+=2){ var a=Math.abs(l[i]), b=Math.abs(r[i]); if(a>pk)pk=a; if(b>pk)pk=b; }
+      recPeaks.push(pk); recLevel(pk); drawRecWave(true);
+    };
+  }catch(err){ recNode=null; }
   applyMix(); applySpace(); applyBright();
 }
 function applyMix(){ if(!ctx)return; padGain.gain.setTargetAtTime(effMix("pad")*.5,ctx.currentTime,.08); melGain.gain.setTargetAtTime(effMix("melody")*.55,ctx.currentTime,.08); bassGain.gain.setTargetAtTime(effMix("bass")*.6,ctx.currentTime,.08); airGain.gain.setTargetAtTime(effMix("air")*.16,ctx.currentTime,.08); if(drumGain) drumGain.gain.setTargetAtTime(effMix("drums")*.9,ctx.currentTime,.08); if(rollGain) rollGain.gain.setTargetAtTime(effMix("roll")*.7,ctx.currentTime,.08); }
@@ -446,6 +554,18 @@ function playBass(t,chordDeg,strong){
   o.connect(g); g.connect(bassGain); o.start(t); o.stop(t+2.6);
 }
 var melDegree=4, melDir=1;
+function playMelodyDeg(t,deg){
+  /* one melody note at an exact scale degree — used by the wandering walk AND by tapped gesture loops */
+  var root=60+state.key+state.elem.melOct*12;
+  var o=ctx.createOscillator(); o.type="sine"; o.frequency.value=midiHz(degreeMidi(root,deg));
+  var o2=ctx.createOscillator(); o2.type="triangle"; o2.frequency.value=midiHz(degreeMidi(root,deg))*2;
+  var g=ctx.createGain(), g2=ctx.createGain(); g2.gain.value=.12;
+  var dur=(1.4+Math.random()*1.6+state.space*1.2)*state.elem.melLen;
+  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.34,t+.04); g.gain.exponentialRampToValueAtTime(.001,t+dur);
+  o.connect(g); o2.connect(g2); g2.connect(g); g.connect(melGain); g.connect(delaySend); g.connect(verbSend);
+  o.start(t); o2.start(t); o.stop(t+dur+.1); o2.stop(t+dur+.1);
+  pulse(deg);
+}
 function playMelody(t){
   /* wandering walk — varies every pass, returns gently toward home */
   var r=Math.random();
@@ -453,15 +573,7 @@ function playMelody(t){
   else if(r<.7) melDegree-=melDir;
   else if(r<.8) melDegree+=(Math.random()<.5?-2:3);
   if(melDegree>11){melDegree=9;melDir=-1;} if(melDegree<2){melDegree=4;melDir=1;}
-  var root=60+state.key+state.elem.melOct*12;
-  var o=ctx.createOscillator(); o.type="sine"; o.frequency.value=midiHz(degreeMidi(root,melDegree));
-  var o2=ctx.createOscillator(); o2.type="triangle"; o2.frequency.value=midiHz(degreeMidi(root,melDegree))*2;
-  var g=ctx.createGain(), g2=ctx.createGain(); g2.gain.value=.12;
-  var dur=(1.4+Math.random()*1.6+state.space*1.2)*state.elem.melLen;
-  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.34,t+.04); g.gain.exponentialRampToValueAtTime(.001,t+dur);
-  o.connect(g); o2.connect(g2); g2.connect(g); g.connect(melGain); g.connect(delaySend); g.connect(verbSend);
-  o.start(t); o2.start(t); o.stop(t+dur+.1); o2.stop(t+dur+.1);
-  pulse(melDegree);
+  playMelodyDeg(t,melDegree);
 }
 
 /* ---------- drums & piano roll ---------- */
@@ -496,12 +608,13 @@ function scheduleStep(globalBeat,t){
   for(var sub=0;sub<4;sub++){ var step=((globalBeat*4+sub)%16+16)%16; var st=t+sub*(spb()/4);
     DRUMS.forEach(function(d){ if(d.steps[step]) playDrum(d.id,st, step%4===0?1:.85); });
     for(var r=0;r<ROLLROWS;r++){ if(rollGridData[r][step]) playRollNote(r,st); }
+    scheduleGesture(globalBeat,step,st,spb()/4);
     (function(s,when){ setTimeout(function(){ highlightStep(s); }, Math.max(0,(when-(ctx?ctx.currentTime:0))*1000)); })(step,st);
   }
 }
 function highlightStep(s){ document.querySelectorAll("[data-stepcol]").forEach(function(c){ c.classList.toggle("now",+c.dataset.stepcol===s); }); var el=document.getElementById("drumStepRead"); if(el) el.textContent="Step "+(s+1)+" / 16"; }
 /* ---------- scheduler (lookahead, seamless bar loop) ---------- */
-var beat=0,bar=0,nextTime=0,timer=null,barStartTime=0,barDurSec=0,uiBar=0,pendingChords={};
+var beat=0,bar=0,nextTime=0,timer=null,barStartTime=0,barDurSec=0,uiBar=0,pendingChords={},beatLog=[];
 function spb(){return 60/state.tempo;}
 function schedule(){
   while(nextTime < ctx.currentTime + 0.18){
@@ -509,15 +622,18 @@ function schedule(){
     if(beat===0){
       barStartTime=nextTime; barDurSec=spb()*state.sig; uiBar=bar;
       playPad(nextTime,barDurSec,chordDeg);
-      playBass(nextTime,chordDeg,true);
-      if(state.sig>=5 && Math.random()<.7) playBass(nextTime+spb()*3,chordDeg,false);
+      if(!gesLoops.bass.on){
+        playBass(nextTime,chordDeg,true);
+        if(state.sig>=5 && Math.random()<.7) playBass(nextTime+spb()*3,chordDeg,false);
+      }
       delayNode.delayTime.setValueAtTime(spb()*.75,nextTime);
       updateChordUI(bar % state.prog.length);
     }
     scheduleStep(bar*state.sig+beat,nextTime);
-    if(beat>0 && state.sig>=4 && beat===Math.floor(state.sig/2) && Math.random()<.5) playBass(nextTime,chordDeg,false);
-    /* melody: chance per beat + occasional off-beat sparkle */
-    if(Math.random() < state.density) playMelody(nextTime + (Math.random()<.25? spb()*.5:0));
+    beatLog.push({i:bar*state.sig+beat,t:nextTime}); if(beatLog.length>96) beatLog.shift();
+    if(!gesLoops.bass.on && beat>0 && state.sig>=4 && beat===Math.floor(state.sig/2) && Math.random()<.5) playBass(nextTime,chordDeg,false);
+    /* melody: chance per beat — replaced by the player's tapped loop while one is in use */
+    if(!gesLoops.melody.on && Math.random() < state.density) playMelody(nextTime + (Math.random()<.25? spb()*.5:0));
     if(Math.random() < state.density*.28) setTimeout(function(){},0);
     nextTime+=spb(); beat++;
     if(beat>=state.sig){
@@ -548,7 +664,19 @@ PRESETS.forEach(function(p,i){
     state.tempo=p.tempo; state.sig=p.sig; state.pendingSig=null;
     state.density=p.density; state.bright=p.bright; state.space=p.space; var keepD=state.mix.drums,keepR=state.mix.roll; state.mix=Object.assign({},p.mix); state.mix.drums=keepD; state.mix.roll=keepR;
     var ed=presetEdits[i];
-    if(ed){ state.prog=ed.prog.slice(); state.elem=Object.assign({},ed.elem); state.mix.pad=ed.mix.pad; state.mix.melody=ed.mix.melody; state.mix.bass=ed.mix.bass; state.mix.air=ed.mix.air; }
+    if(ed){ state.prog=ed.prog.slice(); state.elem=Object.assign({},ed.elem); state.mix.pad=ed.mix.pad; state.mix.melody=ed.mix.melody; state.mix.bass=ed.mix.bass; state.mix.air=ed.mix.air;
+      if(ed.ges){ gesLoops.melody={on:!!ed.ges.melody.on,events:gesClone(ed.ges.melody.events)}; gesLoops.bass={on:!!ed.ges.bass.on,events:gesClone(ed.ges.bass.events)}; }
+      if(ed.drums) DRUMS.forEach(function(d,j){ d.steps=ed.drums[j].slice(); });
+      if(ed.roll){ rollGridData.forEach(function(r,j){ for(var c=0;c<16;c++) r[c]=ed.roll[j][c]; }); rollInst=ed.rollInst||"lead"; var rs=$("rollInst"); if(rs) rs.value=rollInst; }
+    } else {
+      /* first visit to this template: its loops start empty, drums & roll at their defaults */
+      gesLoops.melody={on:false,events:[]}; gesLoops.bass={on:false,events:[]};
+      DRUMS.forEach(function(d,j){ d.steps=DEFDRUMS[j].slice(); });
+      rollGridData.forEach(function(r,j){ for(var c=0;c<16;c++) r[c]=DEFROLL[j][c]; }); rollInst="lead"; var rs2=$("rollInst"); if(rs2) rs2.value="lead";
+    }
+    if(window.__rebuildDrums) window.__rebuildDrums();
+    if(window.__rebuildRoll) window.__rebuildRoll();
+    syncGesUI();
     $("nowTrack").textContent=p.name;
     syncAllUI(); applyMix(); applySpace(); applyBright(); syncElemUI();
     toast(p.name+" — "+NOTES[p.key]+" "+MODES[p.mode].label);
@@ -726,15 +854,17 @@ function syncAllUI(){ syncKeyUI(); syncModeUI(); syncSigUI(); refreshPills(); re
 /* ----- Drum grid UI ----- */
 (function(){
   var grid=$("drumGrid"); if(!grid) return;
-  DRUMS.forEach(function(d,ri){
-    var row=document.createElement("div"); row.className="seqRow"; row.innerHTML="<span>"+d.name+"</span>";
-    d.steps.forEach(function(on,ci){ var b=document.createElement("button"); b.className="cell"+(on?" on":"")+(ci%4===0?" beat":""); b.dataset.stepcol=ci; b.setAttribute("aria-label",d.name+" step "+(ci+1)); b.onclick=function(){ d.steps[ci]=d.steps[ci]?0:1; b.classList.toggle("on",!!d.steps[ci]); if(d.steps[ci]&&ctx&&state.playing) playDrum(d.id,ctx.currentTime,1); }; row.appendChild(b); });
-    grid.appendChild(row);
-  });
+  function buildDrums(){
+    grid.innerHTML="";
+    DRUMS.forEach(function(d,ri){
+      var row=document.createElement("div"); row.className="seqRow"; row.innerHTML="<span>"+d.name+"</span>";
+      d.steps.forEach(function(on,ci){ var b=document.createElement("button"); b.className="cell"+(on?" on":"")+(ci%4===0?" beat":""); b.dataset.stepcol=ci; b.setAttribute("aria-label",d.name+" step "+(ci+1)); b.onclick=function(){ d.steps[ci]=d.steps[ci]?0:1; b.classList.toggle("on",!!d.steps[ci]); if(d.steps[ci]&&ctx&&state.playing) playDrum(d.id,ctx.currentTime,1); }; row.appendChild(b); });
+      grid.appendChild(row);
+    });
+  }
+  buildDrums(); window.__rebuildDrums=buildDrums;
   var presets={chill:[[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,1],[0,0,0,1,0,0,1,0,0,1,0,0,0,0,1,0]],pulse:[[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],[0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,1]],sparse:[[1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0],[0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0],[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0]],clear:[[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]};
-  document.querySelectorAll("[data-drumpreset]").forEach(function(btn){ btn.onclick=function(){ document.querySelectorAll("[data-drumpreset]").forEach(function(x){x.classList.remove("active");}); btn.classList.add("active"); var p=presets[btn.dataset.drumpreset]; if(!p) return; DRUMS.forEach(function(d,i){ d.steps=p[i].slice(); }); grid.innerHTML=""; /* rebuild by reloading cells */ DRUMS.forEach(function(d,ri){}); // simple: rebuild via event
-    // rebuild grid manually
-    grid.innerHTML=""; DRUMS.forEach(function(d){ var row=document.createElement("div"); row.className="seqRow"; row.innerHTML="<span>"+d.name+"</span>"; d.steps.forEach(function(on,ci){ var b=document.createElement("button"); b.className="cell"+(on?" on":"")+(ci%4===0?" beat":""); b.dataset.stepcol=ci; b.onclick=function(){ d.steps[ci]=d.steps[ci]?0:1; b.classList.toggle("on",!!d.steps[ci]); }; row.appendChild(b); }); grid.appendChild(row); });
+  document.querySelectorAll("[data-drumpreset]").forEach(function(btn){ btn.onclick=function(){ document.querySelectorAll("[data-drumpreset]").forEach(function(x){x.classList.remove("active");}); btn.classList.add("active"); var p=presets[btn.dataset.drumpreset]; if(!p) return; DRUMS.forEach(function(d,i){ d.steps=p[i].slice(); }); buildDrums();
     toast("Drums: "+btn.textContent); }; });
   $("drumVol").addEventListener("input",function(e){ state.mix.drums=e.target.value/100; applyMix(); renders.forEach(function(r){r();}); });
 })();
@@ -808,7 +938,8 @@ buildBeatMap(); setInterval(function(){ document.querySelectorAll(".beatdot").fo
 /* ---------- per-template element controls ---------- */
 var presetEdits={};
 function defaultElem(){ return {padSwell:.32,padSpread:1,melOct:0,melLen:1,bassOct:0,airTone:.5}; }
-function savePresetEdit(i){ presetEdits[i]={prog:state.prog.slice(),elem:Object.assign({},state.elem),mix:{pad:state.mix.pad,melody:state.mix.melody,bass:state.mix.bass,air:state.mix.air}}; }
+function gesClone(evts){ return (evts||[]).map(function(e){ return {step:e.step,off:e.off,deg:e.deg}; }); }
+function savePresetEdit(i){ presetEdits[i]={prog:state.prog.slice(),elem:Object.assign({},state.elem),mix:{pad:state.mix.pad,melody:state.mix.melody,bass:state.mix.bass,air:state.mix.air},ges:{melody:{on:gesLoops.melody.on,events:gesClone(gesLoops.melody.events)},bass:{on:gesLoops.bass.on,events:gesClone(gesLoops.bass.events)}},drums:DRUMS.map(function(d){return d.steps.slice();}),roll:rollGridData.map(function(r){return r.slice();}),rollInst:rollInst}; }
 var ROMAN=["I","II","III","IV","V","VI","VII"];
 function romanOf(d){ var nm=chordName(d), r=ROMAN[d]; return nm.slice(-1)==="m"? r.toLowerCase():r; }
 function buildProgSlots(){
@@ -845,6 +976,340 @@ function syncElemUI(){
   elemRenders.forEach(function(r){r();});
   octSegSync("elMelOct","melOct"); octSegSync("elBassOct","bassOct");
 }
+
+/* ---------- gesture loops — tap your own loops, per template ---------- */
+var gesLoops={melody:{on:false,events:[]},bass:{on:false,events:[]}};
+var gesInst="melody", gesRec=false, gesQuant=true;
+var DEFDRUMS=DRUMS.map(function(d){return d.steps.slice();});
+var DEFROLL=rollGridData.map(function(r){return r.slice();});
+/* position inside the 16-step loop, from the audio clock — what the player is actually hearing */
+function heardStepFloat(){
+  if(!ctx||!beatLog.length) return 0;
+  var now=ctx.currentTime, e=beatLog[0];
+  for(var i=beatLog.length-1;i>=0;i--){ if(beatLog[i].t<=now){ e=beatLog[i]; break; } }
+  var pos=e.i+(now-e.t)/spb();
+  return ((pos*4)%16+16)%16;
+}
+function gesAddEvent(inst,sf,deg){
+  var L=gesLoops[inst]; var step=((Math.round(sf)%16)+16)%16;
+  var off=gesQuant?0:Math.max(-.5,Math.min(.5,sf-Math.round(sf)));
+  L.events=L.events.filter(function(ev){return ev.step!==step;});
+  L.events.push({step:step,off:off,deg:deg});
+  L.events.sort(function(a,b){return a.step-b.step;});
+  if(!L.on) L.on=true;
+  syncGesUI();
+}
+/* called from the step scheduler: play the tapped loops */
+function scheduleGesture(globalBeat,step,t,stepDur){
+  if(!gesLoops.melody.on && !gesLoops.bass.on) return;
+  var bIdx=Math.floor(globalBeat/state.sig); var chordDeg=state.prog[bIdx%state.prog.length];
+  if(gesLoops.melody.on) gesLoops.melody.events.forEach(function(ev){ if(ev.step===step) playMelodyDeg(t+ev.off*stepDur,ev.deg); });
+  if(gesLoops.bass.on) gesLoops.bass.events.forEach(function(ev){ if(ev.step===step) playBass(t+ev.off*stepDur,chordDeg+ev.deg,step%4===0); });
+}
+function gesStripRender(){
+  var strip=$("gesStrip"); if(!strip) return;
+  if(strip.childElementCount!==16){ strip.innerHTML=""; for(var i=0;i<16;i++){ var c=document.createElement("div"); c.className="gesCell"; c.dataset.stepcol=i; strip.appendChild(c); } }
+  for(var s=0;s<16;s++){
+    var has=false;
+    if(gesInst==="drums") has=DRUMS.some(function(d){return !!d.steps[s];});
+    else has=gesLoops[gesInst].events.some(function(ev){return ev.step===s;});
+    strip.children[s].classList.toggle("has",has);
+    strip.children[s].classList.toggle("bass",gesInst==="bass");
+  }
+}
+function gesReadUpdate(){
+  var el=$("gesRead"); if(!el) return;
+  if(gesInst==="drums"){
+    var n=0; DRUMS.forEach(function(d){ d.steps.forEach(function(s){ n+=s?1:0; }); });
+    el.textContent="Drum pads write straight into the drum machine — "+n+" hits in this template's pattern right now. While recording, each tap lands on the step you hear.";
+    return;
+  }
+  var L=gesLoops[gesInst], nm=gesInst==="melody"?"Melody":"Bass";
+  if(L.events.length) el.textContent=nm+" loop: "+L.events.length+" tapped note"+(L.events.length>1?"s":"")+" · "+(L.on?("playing — it has replaced the engine's "+(gesInst==="melody"?"improvised melody":"bass part")+" for this template"):"recorded but not in use — switch “Use my loop” on to hear it");
+  else el.textContent=nm+" loop: empty — the engine improvises this part. Press ● Record and tap the pad in time to take it over.";
+  var ub=$("gesUse"); if(ub){ ub.textContent="Use my loop: "+(L.on?"On":"Off"); ub.classList.toggle("active",L.on); }
+}
+function syncGesUI(){
+  document.querySelectorAll("#gesInstSeg button").forEach(function(b){ b.classList.toggle("active",b.dataset.i===gesInst); });
+  var isD=gesInst==="drums";
+  if($("gesPad")) $("gesPad").style.display=isD?"none":"block";
+  if($("gesDrums")) $("gesDrums").style.display=isD?"grid":"none";
+  if($("gesUse")) $("gesUse").style.display=isD?"none":"";
+  var rb=$("gesRec"); if(rb){ rb.classList.toggle("recording",gesRec); rb.textContent=gesRec?"■ Stop recording":"● Record"; }
+  var gn=$("gesPresetName"); if(gn) gn.textContent=PRESETS[state.preset].name;
+  gesStripRender(); gesReadUpdate();
+}
+/* --- the note pad: tap = note (height = pitch), hold + drag = glissando --- */
+var gesPadEl=$("gesPad"), gesPointer=null, gesLastNoteAt=0;
+function gesRipple(x,y){ if(!gesPadEl) return; var s=document.createElement("span"); s.className="gesRipple"; s.style.left=(x*100)+"%"; s.style.top=(y*100)+"%"; gesPadEl.appendChild(s); setTimeout(function(){ s.remove(); },580); }
+function gesPadPlay(e){
+  var r=gesPadEl.getBoundingClientRect();
+  var x=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)), y=Math.max(0,Math.min(1,(e.clientY-r.top)/r.height));
+  var deg= gesInst==="melody"? Math.round(11-y*9) : Math.round((1-y)*4);
+  gesRipple(x,y);
+  var pc= gesInst==="melody"? degreeMidi(60+state.key,deg) : degreeMidi(60+state.key,state.prog[bar%state.prog.length]+deg);
+  var pr=$("gesPadRead"); if(pr) pr.textContent="♪ "+NOTES[((pc%12)+12)%12]+" · "+(gesInst==="melody"?("scale degree "+(deg+1)):("chord root +"+deg));
+  if(!ctx){ toast("Press Play first so audio is running"); return; }
+  var now=ctx.currentTime;
+  if(gesInst==="melody") playMelodyDeg(now,deg);
+  else playBass(now,state.prog[bar%state.prog.length]+deg,true);
+  if(gesRec && state.playing) gesAddEvent(gesInst,heardStepFloat(),deg);
+}
+if(gesPadEl){
+  gesPadEl.addEventListener("pointerdown",function(e){ gesPointer=e.pointerId; try{gesPadEl.setPointerCapture(e.pointerId);}catch(err){} gesLastNoteAt=performance.now(); gesPadPlay(e); });
+  gesPadEl.addEventListener("pointermove",function(e){ if(gesPointer!==e.pointerId) return; var n=performance.now(); if(n-gesLastNoteAt<120) return; gesLastNoteAt=n; gesPadPlay(e); });
+  var gesPadEnd=function(e){ if(gesPointer===e.pointerId) gesPointer=null; };
+  gesPadEl.addEventListener("pointerup",gesPadEnd); gesPadEl.addEventListener("pointercancel",gesPadEnd);
+}
+/* --- drum pads: tap = hit, recorded straight into the drum steps --- */
+document.querySelectorAll(".gesDrum").forEach(function(b){
+  b.addEventListener("pointerdown",function(e){
+    e.preventDefault(); var id=b.dataset.d;
+    if(!ctx){ toast("Press Play first so audio is running"); return; }
+    playDrum(id,ctx.currentTime,1);
+    b.classList.add("hit"); setTimeout(function(){ b.classList.remove("hit"); },130);
+    if(gesRec && state.playing){
+      var step=Math.round(heardStepFloat())%16;
+      DRUMS.forEach(function(d){ if(d.id===id) d.steps[step]=1; });
+      if(window.__rebuildDrums) window.__rebuildDrums();
+      syncGesUI();
+    }
+  });
+});
+/* --- gesture panel controls --- */
+document.querySelectorAll("#gesInstSeg button").forEach(function(b){ b.onclick=function(){ gesInst=b.dataset.i; syncGesUI(); }; });
+$("gesRec").onclick=function(){
+  gesRec=!gesRec;
+  if(gesRec && !state.playing) $("playBtn").click();
+  if(gesRec) toast("Recording — tap the "+gesInst+" in time with the loop");
+  syncGesUI();
+};
+$("gesUse").onclick=function(){ if(gesInst==="drums") return; gesLoops[gesInst].on=!gesLoops[gesInst].on; syncGesUI(); };
+$("gesQuant").onclick=function(){ gesQuant=!gesQuant; this.textContent="Quantize: "+(gesQuant?"On":"Off"); this.classList.toggle("active",gesQuant); };
+$("gesClear").onclick=function(){
+  if(gesInst==="drums"){ DRUMS.forEach(function(d){ d.steps=d.steps.map(function(){return 0;}); }); if(window.__rebuildDrums) window.__rebuildDrums(); }
+  else gesLoops[gesInst].events=[];
+  syncGesUI(); toast("Loop cleared");
+};
+$("gesBlank").onclick=function(){
+  state.density=0;
+  DRUMS.forEach(function(d){ d.steps=d.steps.map(function(){return 0;}); });
+  rollGridData.forEach(function(r){ for(var i=0;i<16;i++) r[i]=0; });
+  gesLoops.melody.events=[]; gesLoops.bass.events=[];
+  gesLoops.melody.on=true; gesLoops.bass.on=true;
+  if(window.__rebuildDrums) window.__rebuildDrums();
+  if(window.__rebuildRoll) window.__rebuildRoll();
+  renders.forEach(function(r){ r(); });
+  syncGesUI();
+  toast(PRESETS[state.preset].name+" is blank — tap your own loops in");
+};
+syncGesUI();
+
+/* ---------- hum a loop — microphone pitch & volume → snapped melody ---------- */
+var hum={on:false,stream:null,an:null,buf:null,timer:null,live:true,rec:true,lastDeg:null,stable:0};
+function autoCorrelate(buf,sr){
+  var SIZE=buf.length, rms=0, i;
+  for(i=0;i<SIZE;i++) rms+=buf[i]*buf[i];
+  rms=Math.sqrt(rms/SIZE);
+  if(rms<0.012) return {freq:-1,rms:rms};
+  var r1=0,r2=SIZE-1,th=0.2;
+  for(i=0;i<SIZE/2;i++){ if(Math.abs(buf[i])<th){ r1=i; break; } }
+  for(i=1;i<SIZE/2;i++){ if(Math.abs(buf[SIZE-i])<th){ r2=SIZE-i; break; } }
+  var b=buf.slice(r1,r2), N=b.length; if(N<64) return {freq:-1,rms:rms};
+  var corr=new Float32Array(N), d=0, k, j;
+  for(k=0;k<N;k++){ var s=0; for(j=0;j<N-k;j++) s+=b[j]*b[j+k]; corr[k]=s; }
+  while(d<N-1 && corr[d]>corr[d+1]) d++;
+  var maxv=-1,maxp=-1; for(k=d;k<N;k++){ if(corr[k]>maxv){ maxv=corr[k]; maxp=k; } }
+  var T0=maxp;
+  if(T0>0&&T0<N-1){ var x1=corr[T0-1],x2=corr[T0],x3=corr[T0+1],a=(x1+x3-2*x2)/2,bb=(x3-x1)/2; if(a) T0=T0-bb/(2*a); }
+  return {freq:T0>0?sr/T0:-1, rms:rms};
+}
+function humSnap(freq){
+  var midi=69+12*Math.log(freq/440)/Math.log(2), best=4, bd=1e9;
+  for(var deg=-2;deg<=16;deg++){ var m=degreeMidi(60+state.key,deg), dd=Math.abs(m-midi); if(dd<bd){ bd=dd; best=deg; } }
+  return best;
+}
+function humSetStatus(t){ var s=$("humStatus"); if(s) s.textContent=t; }
+async function humStart(){
+  if(hum.on) return;
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ humSetStatus("No microphone API"); $("humMsg").textContent="This browser can't open a microphone — the touch pads above still write loops."; toast("Microphone not available — touch pads still work"); return; }
+  try{
+    if(!ctx){ buildAudio(); }
+    if(ctx.state==="suspended") await ctx.resume();
+    hum.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+    var src=ctx.createMediaStreamSource(hum.stream);
+    hum.an=ctx.createAnalyser(); hum.an.fftSize=2048; hum.buf=new Float32Array(hum.an.fftSize);
+    var mute=ctx.createGain(); mute.gain.value=0; src.connect(hum.an); hum.an.connect(mute); mute.connect(ctx.destination);
+    hum.on=true; hum.lastDeg=null; hum.stable=0;
+    humSetStatus("Listening"); $("humRead").textContent="Listening — hum a note…";
+    toast("Microphone on — hum a melody");
+    hum.timer=setInterval(humFrame,70);
+  }catch(err){
+    humSetStatus("Denied / unavailable");
+    $("humMsg").textContent="Microphone permission was denied or no mic was found, so nothing is listening. The touch pads and piano roll still write loops — or allow the mic in your browser settings and try again.";
+    toast("Microphone unavailable — touch fallback still works");
+  }
+}
+function humStop(){
+  if(hum.timer) clearInterval(hum.timer); hum.timer=null;
+  if(hum.stream){ hum.stream.getTracks().forEach(function(t){ t.stop(); }); hum.stream=null; }
+  hum.on=false; if(ctx&&humGain) humGain.gain.setTargetAtTime(0,ctx.currentTime,.08);
+  humSetStatus("Mic off"); $("humNote").textContent="—"; $("humRead").textContent="Microphone is off"; $("humFill").style.width="0%";
+}
+function humFrame(){
+  if(!hum.on||!hum.an) return;
+  hum.an.getFloatTimeDomainData(hum.buf);
+  var res=autoCorrelate(hum.buf,ctx.sampleRate);
+  $("humFill").style.width=Math.round(Math.min(1,res.rms*3.2)*100)+"%";
+  if(res.freq>50&&res.freq<1400&&res.rms>=0.012){
+    var deg=humSnap(res.freq), m=degreeMidi(60+state.key,deg), name=NOTES[((m%12)+12)%12]+(Math.floor(m/12)-1);
+    $("humNote").textContent=name;
+    $("humRead").textContent=Math.round(res.freq)+" Hz heard → snapped to "+name+" ("+NOTES[state.key]+" "+MODES[state.mode].label+")";
+    if(ctx&&humOsc){
+      var f=midiHz(m);
+      humOsc.frequency.setTargetAtTime(f,ctx.currentTime,.03);
+      humOsc2.frequency.setTargetAtTime(f*2,ctx.currentTime,.03);
+      if(hum.live) humGain.gain.setTargetAtTime(Math.min(.5,res.rms*2.4),ctx.currentTime,.05);
+      else humGain.gain.setTargetAtTime(0,ctx.currentTime,.05);
+    }
+    if(deg===hum.lastDeg) hum.stable++; else { hum.lastDeg=deg; hum.stable=1; }
+    if(hum.stable===2&&hum.rec){
+      if(state.playing){
+        var sf=heardStepFloat(), ldeg=Math.max(2,Math.min(11,deg));
+        gesAddEvent("melody",sf,ldeg);
+        $("humMsg").textContent="♪ "+name+" written into this template's melody loop at step "+(((Math.round(sf)%16)+16)%16+1)+" — keep humming to build the line.";
+      } else {
+        $("humMsg").textContent="Heard "+name+" — press Play so hummed notes can be placed into the loop you're hearing.";
+      }
+    }
+  } else {
+    $("humNote").textContent="—"; $("humRead").textContent="Listening — hum a note…";
+    if(ctx&&humGain) humGain.gain.setTargetAtTime(0,ctx.currentTime,.09);
+    hum.lastDeg=null; hum.stable=0;
+  }
+}
+$("humStart").onclick=humStart;
+$("humStop").onclick=humStop;
+$("humLive").onclick=function(){ hum.live=!hum.live; this.textContent="Hum voice: "+(hum.live?"On":"Off"); this.classList.toggle("active",hum.live); if(!hum.live&&ctx&&humGain) humGain.gain.setTargetAtTime(0,ctx.currentTime,.05); };
+$("humRec").onclick=function(){ hum.rec=!hum.rec; this.textContent="Write hum into melody loop: "+(hum.rec?"On":"Off"); this.classList.toggle("active",hum.rec); };
+
+/* ---------- performance recording & export — WAV in-page, MediaRecorder fallback ---------- */
+var recNode=null, recActive=false, recMode="wav", recChunksL=[], recChunksR=[], recPeaks=[], recMR=null, recMRChunks=[], recStreamDest=null, recStartAt=0, recTimerInt=null, recURL=null;
+function recFmtTime(ms){ var s=Math.floor(ms/1000); return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0"); }
+function recCol(name){ var v=""; try{ v=getComputedStyle(document.documentElement).getPropertyValue(name); }catch(e){} return v? v.trim():""; }
+/* bar colour follows amplitude along a green → amber → red gradient */
+function recLevelColor(p){
+  function mix(a,b,t){ return Math.round(a+(b-a)*t); }
+  var r,g,b;
+  if(p<0.7){ var t=Math.max(0,Math.min(1,(p-0.35)/0.35)); r=mix(53,230,t); g=mix(178,178,t); b=mix(111,92,t); }
+  else { var t2=Math.max(0,Math.min(1,(p-0.7)/0.25)); r=mix(230,229,t2); g=mix(178,72,t2); b=mix(92,77,t2); }
+  return "rgb("+r+","+g+","+b+")";
+}
+/* sustained-hot tracker: the warning lights while the level stays near clipping
+   and clears as soon as the level comes back down */
+var recHot=0;
+function recLevel(p){
+  if(p>=0.9) recHot=Math.min(1,recHot+0.34);
+  else if(p<0.7) recHot=Math.max(0,recHot-0.3);
+  var hot=recActive&&recHot>=0.99;
+  var w=$("recWarn"); if(w) w.classList.toggle("on",hot);
+  var cv=$("recWave"); if(cv) cv.classList.toggle("hot",hot);
+}
+function drawRecWave(live){
+  var cv=$("recWave"); if(!cv) return; var g=cv.getContext("2d"), W=cv.width, H=cv.height, mid=H/2;
+  g.clearRect(0,0,W,H);
+  g.fillStyle="rgba(127,191,168,0.05)"; g.fillRect(0,0,W,H);
+  g.strokeStyle=recCol("--line")||"#888"; g.beginPath(); g.moveTo(0,mid+.5); g.lineTo(W,mid+.5); g.stroke();
+  var cols=Math.floor(W/6); if(!cols) return;
+  for(var x=0;x<cols;x++){
+    var p=0;
+    if(live){ var idx=recPeaks.length-cols+x; p=idx>=0? recPeaks[idx]:0; }
+    else { if(!recPeaks.length) break; var a=Math.floor(x*recPeaks.length/cols), b=Math.max(a+1,Math.floor((x+1)*recPeaks.length/cols)); for(var i=a;i<b&&i<recPeaks.length;i++) if(recPeaks[i]>p) p=recPeaks[i]; }
+    var h=Math.max(2,p*(H-10)); g.fillStyle=recLevelColor(p); g.fillRect(x*6+1,mid-h/2,4,h);
+  }
+}
+function recUI(){
+  var b=$("recBtn"); if(!b) return;
+  b.textContent=recActive?"■ Stop & export":"● Record performance";
+  b.classList.toggle("recording",recActive);
+  $("recDot").classList.toggle("on",recActive);
+}
+function recStart(){
+  if(!ctx){ buildAudio(); }
+  if(ctx.state==="suspended") ctx.resume();
+  if(!state.playing) $("playBtn").click();
+  recChunksL=[]; recChunksR=[]; recPeaks=[]; recMRChunks=[]; recHot=0; recLevel(0);
+  if(recNode){ recMode="wav"; }
+  else if(window.MediaRecorder){
+    try{
+      if(!recStreamDest){ recStreamDest=ctx.createMediaStreamDestination(); analyser.connect(recStreamDest); }
+      var mt=["audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus","audio/mp4",""].filter(function(m){ return m===""||MediaRecorder.isTypeSupported(m); })[0];
+      recMR=new MediaRecorder(recStreamDest.stream, mt?{mimeType:mt}:undefined);
+      recMR.ondataavailable=function(e){ if(e.data&&e.data.size) recMRChunks.push(e.data); };
+      recMR.onstop=recFinishMR;
+      recMR.start(250); recMode="mr";
+    }catch(err){ toast("Recording isn't available in this browser"); return; }
+  } else { toast("Recording isn't available in this browser"); return; }
+  recActive=true; recStartAt=performance.now();
+  var dl=$("recDownload"); if(dl) dl.style.display="none";
+  var wrap=$("recWaveWrap"); if(wrap) wrap.style.display="block";
+  $("recWaveLab").textContent="● Recording — live waveform of what's being captured";
+  $("recTime").textContent="00:00 ● REC";
+  drawRecWave(true);
+  recTimerInt=setInterval(function(){
+    var el=performance.now()-recStartAt;
+    $("recTime").textContent=recFmtTime(el)+" ● REC";
+    if(recMode==="mr"&&analyser){ var td=new Uint8Array(analyser.fftSize); analyser.getByteTimeDomainData(td); var pk=0; for(var i=0;i<td.length;i+=4){ var dd=Math.abs(td[i]-128)/128; if(dd>pk) pk=dd; } recPeaks.push(pk); recLevel(pk); drawRecWave(true); }
+    if(el>10*60*1000){ recStop(); toast("Recording stopped at 10 minutes"); }
+  },200);
+  recUI(); toast("Recording — everything you hear is being captured");
+}
+function recStop(){
+  if(!recActive) return;
+  recActive=false; clearInterval(recTimerInt);
+  if(recMode==="mr"&&recMR&&recMR.state!=="inactive"){ recMR.stop(); }
+  else recFinishWAV();
+  $("recWaveLab").textContent="Last take — waveform of the full recording";
+  drawRecWave(false);
+  recHot=0; recLevel(0);
+  recUI();
+}
+function recFinishWAV(){
+  var total=0; recChunksL.forEach(function(c){ total+=c.length; });
+  if(!total){ toast("Nothing was captured"); return; }
+  var L=new Float32Array(total), R=new Float32Array(total), off=0, i2;
+  for(i2=0;i2<recChunksL.length;i2++){ L.set(recChunksL[i2],off); off+=recChunksL[i2].length; }
+  off=0; for(i2=0;i2<recChunksR.length;i2++){ R.set(recChunksR[i2],off); off+=recChunksR[i2].length; }
+  recShowDownload(encodeWAV(L,R,ctx.sampleRate),"wav");
+}
+function recFinishMR(){
+  var type=(recMR&&recMR.mimeType)||"audio/webm";
+  var ext=type.indexOf("mp4")>=0?"m4a":(type.indexOf("ogg")>=0?"ogg":"webm");
+  recShowDownload(new Blob(recMRChunks,{type:type}),ext);
+  $("recWaveLab").textContent="Last take — waveform of the full recording";
+  drawRecWave(false);
+}
+function recShowDownload(blob,ext){
+  if(recURL) URL.revokeObjectURL(recURL);
+  recURL=URL.createObjectURL(blob);
+  var a=$("recDownload"), d=new Date();
+  function p2(n){ return String(n).padStart(2,"0"); }
+  var name="ambient-studio-"+d.getFullYear()+p2(d.getMonth()+1)+p2(d.getDate())+"-"+p2(d.getHours())+p2(d.getMinutes())+p2(d.getSeconds())+"."+ext;
+  a.href=recURL; a.download=name;
+  a.textContent="Download "+name+" ("+Math.max(1,Math.round(blob.size/1024))+" KB)";
+  a.style.display="inline-block";
+  $("recTime").textContent="Recorded "+recFmtTime(performance.now()-recStartAt);
+  toast("Recording ready — tap Download to save it");
+}
+function encodeWAV(L,R,sr){
+  var n=L.length, buf=new ArrayBuffer(44+n*4), v=new DataView(buf);
+  function ws(o,s){ for(var i=0;i<s.length;i++) v.setUint8(o+i,s.charCodeAt(i)); }
+  ws(0,"RIFF"); v.setUint32(4,36+n*4,true); ws(8,"WAVE"); ws(12,"fmt "); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,2,true); v.setUint32(24,sr,true); v.setUint32(28,sr*4,true); v.setUint16(32,4,true); v.setUint16(34,16,true); ws(36,"data"); v.setUint32(40,n*4,true);
+  var o=44;
+  for(var i=0;i<n;i++){ var l=Math.max(-1,Math.min(1,L[i])), r=Math.max(-1,Math.min(1,R[i])); v.setInt16(o,l<0?l*32768:l*32767,true); v.setInt16(o+2,r<0?r*32768:r*32767,true); o+=4; }
+  return new Blob([buf],{type:"audio/wav"});
+}
+$("recBtn").onclick=function(){ if(recActive) recStop(); else recStart(); };
 
 syncAllUI(); syncElemUI(); draw();
 
