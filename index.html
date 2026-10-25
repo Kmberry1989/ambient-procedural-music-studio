@@ -201,14 +201,22 @@ body.focusLock{overflow:hidden}
 footer{color:var(--muted);font-size:12px;line-height:1.6;margin-top:14px}
 .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:9px 14px;border-radius:999px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:20;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* description tooltips — text lives behind the faded ? in each title */
+.qmark{flex:none;border:1px solid var(--line);background:transparent;color:var(--muted);opacity:.5;width:22px;height:22px;border-radius:50%;font-size:12px;font-weight:700;line-height:1;cursor:pointer;display:inline-grid;place-items:center;padding:0;vertical-align:middle;-webkit-tap-highlight-color:transparent}
+.qmark:hover,.qmark:focus-visible,.qmark.on{opacity:1;color:var(--accent);border-color:var(--accent)}
+h1 .qmark{margin-left:9px;width:24px;height:24px;font-size:13px}
+.rowlab .qmark{width:19px;height:19px;font-size:11px;margin-left:6px}
+.tipPop{position:fixed;z-index:120;max-width:min(350px,88vw);background:var(--panel);color:var(--ink);border:1px solid var(--accent);border-radius:12px;box-shadow:var(--shadow);padding:11px 32px 11px 13px;font-size:13px;line-height:1.55;display:none}
+.tipPop.show{display:block}
+.tipClose{position:absolute;top:5px;right:5px;width:24px;height:24px;border:none;background:transparent;color:var(--muted);font-size:13px;cursor:pointer;border-radius:8px;line-height:1;padding:0}
+.tipClose:hover{color:var(--ink)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
     <div>
-      <h1>Ambient Procedural<br/>Music Studio</h1>
-      <div class="sub">Long, soft generative loops — composed live by the engine, never from audio files. Drag the picture, the dials and the faders to reshape the music while it plays.</div>
+      <h1 data-tip="Long, soft generative loops — composed live by the engine, never from audio files. Drag the picture, the dials and the faders to reshape the music while it plays. Every note is synthesised in your browser with the Web Audio API — chords evolve bar by bar, melodies wander and vary, and each loop returns to its first chord so it can run indefinitely. Key, tempo and time-signature changes land on the next bar, so the music never stutters. Tap any faded ? for help with a section.">Ambient Procedural<br/>Music Studio</h1>
     </div>
     <div class="now">
       <div class="label">Now generating</div>
@@ -250,13 +258,11 @@ footer{color:var(--muted);font-size:12px;line-height:1.6;margin-top:14px}
   </section>
 
   <section class="card">
-    <h2>Template elements — shape this sound <span id="elemPresetName">Drift</span></h2>
-    <div class="hint" style="margin:0 0 12px">Each template (Drift, Tidepool, Canopy…) is built from the same elements — chords, pad, melody, bass and air. Shape them here and your settings are kept <b>for this template only</b>: switch templates and each one remembers its own chords, element settings and mixer levels.</div>
+    <h2 data-tip="Each template (Drift, Tidepool, Canopy…) is built from the same elements — chords, pad, melody, bass and air. Shape them here and your settings are kept for this template only: switch templates and each one remembers its own chords, element settings and mixer levels — including each element's volume, set on the mixing board.">Template elements — shape this sound <span id="elemPresetName">Drift</span></h2>
     <div class="elemGrid">
       <div>
-        <div class="rowlab"><span>Chord progression — the template's loop</span><b class="mono" id="progRead"></b></div>
+        <div class="rowlab"><span data-tip="− / + moves a chord up or down through the scale. New chords land on the next bar.">Chord progression — the template's loop</span><b class="mono" id="progRead"></b></div>
         <div class="pslots" id="progSlots"></div>
-        <div class="hint">− / + moves a chord up or down through the scale. New chords land on the next bar.</div>
         <div class="rowlab" style="margin-top:14px"><span>Melody octave</span></div>
         <div class="seg" id="elMelOct"><button data-o="-1">Low −1</button><button data-o="0" class="active">Normal</button><button data-o="1">High +1</button></div>
         <div class="rowlab" style="margin-top:12px"><span>Bass octave</span></div>
@@ -267,14 +273,12 @@ footer{color:var(--muted);font-size:12px;line-height:1.6;margin-top:14px}
         <div class="elemRow"><div class="rowlab"><span>Pad spread — detune shimmer</span><b id="elSpreadVal"></b></div><div class="hfader" id="elSpread"><div class="fill"></div><div class="handle"></div></div></div>
         <div class="elemRow"><div class="rowlab"><span>Melody note length</span><b id="elLenVal"></b></div><div class="hfader" id="elLen"><div class="fill"></div><div class="handle"></div></div></div>
         <div class="elemRow"><div class="rowlab"><span>Air tone — texture brightness</span><b id="elAirVal"></b></div><div class="hfader" id="elAir"><div class="fill"></div><div class="handle"></div></div></div>
-        <div class="hint">Pad, melody, bass and air also keep their own mixer volumes per template — set them on the mixing board and the template remembers.</div>
       </div>
     </div>
   </section>
 
   <section class="card">
-    <h2>Gesture loops — tap the music in <span id="gesPresetName">Drift</span></h2>
-    <div class="hint" style="margin:0 0 12px">Templates don't have to arrive ready-made. Pick an instrument, press <b>● Record</b> and <b>tap the pad in time with the loop</b> — high on the pad is a high note, low is a low note. Your taps become that instrument's loop for <b>this template</b>, replacing the part the engine would have improvised. Hold and drag for a glissando run. Drum taps write straight into the drum machine's steps below. Every template keeps its own loops.</div>
+    <h2 data-tip="Templates don't have to arrive ready-made. Pick an instrument, press ● Record and tap the pad in time with the loop — high on the pad is a high note, low is a low note. Your taps become that instrument's loop for this template, replacing the part the engine would have improvised. Hold and drag for a glissando run. Drum taps write straight into the drum machine's steps. The strip under the pads shows your loop across its 16 steps and lights up as it plays. Quantize on snaps taps to the nearest step; off keeps your exact timing inside the step. 'Start this template blank' silences the ready-made parts (improvised melody, drum pattern, piano roll) so the template is only chords plus whatever you tap in. Every template keeps its own loops.">Gesture loops — tap the music in <span id="gesPresetName">Drift</span></h2>
     <div class="seg" id="gesInstSeg" style="margin-bottom:10px">
       <button data-i="melody" class="active">♪ Melody pad</button><button data-i="bass">Bass pad</button><button data-i="drums">Drum pads</button>
     </div>
@@ -295,12 +299,10 @@ footer{color:var(--muted);font-size:12px;line-height:1.6;margin-top:14px}
       <button id="gesBlank">Start this template blank</button>
     </div>
     <div class="hint" id="gesRead">Melody loop: empty — the engine improvises this part.</div>
-    <div class="hint">The strip shows your loop across its 16 steps and lights up as it plays. <b>Quantize on</b> snaps taps to the nearest step; off keeps your exact timing inside the step. “Start this template blank” silences the ready-made parts (improvised melody, drum pattern, piano roll) so the template is only chords plus whatever you tap in.</div>
   </section>
 
   <section class="card">
-    <h2>Hum a loop — your voice becomes the melody <span id="humStatus">Mic off</span></h2>
-    <div class="hint" style="margin:0 0 12px">Hum, sing, whistle, or play any sound into your microphone. The studio listens for pitch and volume, <b>snaps what it hears to the current key &amp; scale</b>, and plays it back as a soft instrument voice. With writing on, each steady note you hum is placed into <b>this template's melody loop</b> — the same loop the Melody pad writes — so a hummed line becomes the template's melody. The mic is <b>opt-in only</b>, never starts by itself, and is analysed on this device only: nothing is recorded or sent anywhere.</div>
+    <h2 data-tip="Hum, sing, whistle, or play any sound into your microphone. The studio listens for pitch and volume, snaps what it hears to the current key &amp; scale, and plays it back as a soft instrument voice. With writing on, each steady note you hum is placed into this template's melody loop — the same loop the Melody pad writes — so a hummed line becomes the template's melody. Tip: press Play first so written notes land in the loop you're hearing — each new steady note is placed on the step playing at that moment. The mic is opt-in only, never starts by itself, and is analysed on this device only: nothing is recorded or sent anywhere. If the mic is denied, the touch pads above still write loops.">Hum a loop — your voice becomes the melody <span id="humStatus">Mic off</span></h2>
     <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
       <div class="humNote mono" id="humNote">—</div>
       <div style="flex:1;min-width:180px">
@@ -313,14 +315,13 @@ footer{color:var(--muted);font-size:12px;line-height:1.6;margin-top:14px}
       <button id="humLive" class="active">Hum voice: On</button>
       <button id="humRec" class="active">Write hum into melody loop: On</button>
     </div>
-    <div class="hint" id="humMsg">Tip: press Play first so written notes land in the loop you're hearing — each new steady note is placed on the step playing at that moment. If the mic is denied, the touch pads above still write loops.</div>
+    <div class="hint" id="humMsg"></div>
   </section>
 
   <div class="board">
     <section class="card">
-      <h2>Spectrum — drag to play it <span id="vizRead">brightness · key</span></h2>
+      <h2 data-tip="What you're seeing: each spoke is one slice of the sound's frequencies — the longer it glows, the louder that slice is right now. The wavy ring inside is the waveform of the pad, melody and bass together, and the centre shows the current key, tempo and time. It's also an instrument: drag ↔ to shift the key, drag ↕ to open or close the brightness. The three faders below are a simple EQ — Sub, Body and Air.">Spectrum — drag to play it <span id="vizRead">brightness · key</span></h2>
       <canvas id="viz" width="880" height="600"></canvas>
-      <div class="hint"><b>What you're seeing:</b> each spoke is one slice of the sound's frequencies — the longer it glows, the louder that slice is right now. The wavy ring inside is the waveform of the pad, melody and bass together, and the centre shows the current key, tempo and time. <b>It's also an instrument:</b> drag ↔ to shift the key, drag ↕ to open or close the brightness.</div>
       <div class="eq">
         <div class="mini"><label>Sub · 120 Hz</label><div class="vfader" data-eq="low"><div class="fill"></div><div class="handle"></div></div><div class="val mono" data-eqval="low">0 dB</div></div>
         <div class="mini"><label>Body · 900 Hz</label><div class="vfader" data-eq="mid"><div class="fill"></div><div class="handle"></div></div><div class="val mono" data-eqval="mid">0 dB</div></div>
@@ -330,15 +331,14 @@ footer{color:var(--muted);font-size:12px;line-height:1.6;margin-top:14px}
 
     <div class="controls">
       <section class="card">
-        <h2>Tempo &amp; time</h2>
+        <h2 data-tip="Drag the tempo knob up or down to change the speed. Time signature picks are queued — a dashed orange outline means your pick is registered and lands on the next bar. Melody density sets how busy the improvised melody is.">Tempo &amp; time</h2>
         <div class="knobrow">
           <div class="knobwrap"><div class="knob" id="tempoKnob"><i id="tempoNeedle"></i><b class="mono" id="tempoVal">52</b></div><small>Tempo — drag ↕</small></div>
           <div style="flex:1;min-width:150px">
-            <div class="rowlab"><span>Time signature</span><b id="sigVal">4/4</b></div>
+            <div class="rowlab"><span data-tip="Time changes are queued — a dashed orange outline means your pick is registered and lands on the next bar.">Time signature</span><b id="sigVal">4/4</b></div>
             <div class="seg" id="sigSeg">
               <button data-sig="3">3/4</button><button data-sig="4" class="active">4/4</button><button data-sig="5">5/4</button><button data-sig="6">6/4</button>
             </div>
-            <div class="hint" style="margin-top:6px">Time changes are <b>queued</b> — a dashed orange outline means your pick is registered and lands on the next bar.</div>
             <div class="rowlab" style="margin-top:12px"><span>Melody density</span><b id="densVal">45%</b></div>
             <div class="hfader" id="densFader"><div class="fill"></div><div class="handle"></div></div>
           </div>
@@ -346,25 +346,24 @@ footer{color:var(--muted);font-size:12px;line-height:1.6;margin-top:14px}
       </section>
 
       <section class="card">
-        <h2>Key &amp; scale <span id="keyRead">C major pentatonic</span></h2>
+        <h2 data-tip="Tap a key and a scale to reshape the harmony. Changes are queued — the dashed orange outline (and the note under the play button) shows what's waiting for the next bar; the solid colour is what you're hearing now.">Key &amp; scale <span id="keyRead">C major pentatonic</span></h2>
         <div class="keys" id="keys"></div>
-        <div class="rowlab" style="margin-top:12px"><span>Scale</span></div>
+        <div class="rowlab" style="margin-top:12px"><span data-tip="Key &amp; scale changes are queued too — the dashed orange outline (and the note under the play button) shows what's waiting for the next bar; the solid colour is what you're hearing now.">Scale</span></div>
         <div class="seg" id="modeSeg"></div>
-        <div class="hint" style="margin-top:8px">Key &amp; scale changes are <b>queued</b> too — the dashed orange outline (and the note under the play button) shows what's waiting for the next bar; the solid colour is what you're hearing now.</div>
       </section>
 
       <section class="card">
-        <h2>Brightness × Space <span>XY pad</span></h2>
+        <h2 data-tip="Drag the dot on the pad: X opens the filter (brightness), Y lengthens the echo &amp; wash (space). Both reshape the sound live while it plays.">Brightness × Space <span>XY pad</span></h2>
         <div class="xypad" id="xyPad">
           <span class="xy-lab" style="left:10px;top:8px">more space ↑</span>
           <span class="xy-lab" style="right:10px;bottom:8px">brighter →</span>
           <div class="xydot" id="xyDot"></div>
         </div>
-        <div class="hint" style="margin-top:8px"><span class="mono" id="xyRead">Bright 55% · Space 55%</span> — X opens the filter, Y lengthens the echo &amp; wash.</div>
+        <div class="hint" style="margin-top:8px"><span class="mono" id="xyRead">Bright 55% · Space 55%</span></div>
       </section>
 
       <section class="card">
-        <h2>Mixing board — instrument faders</h2>
+        <h2 data-tip="One fader per instrument — Pad, Melody, Bass, Air, Drums and Piano Roll. Drag a fader to set its volume, M mutes it, S solos it (solo isolates that instrument). Levels are remembered per template.">Mixing board — instrument faders</h2>
         <div class="channels" id="channels"></div>
       </section>
     </div>
@@ -373,8 +372,7 @@ footer{color:var(--muted);font-size:12px;line-height:1.6;margin-top:14px}
   <!-- MIXER NOTE: existing faders above now have M / S per track -->
   <div class="sectionGrid">
     <section class="card">
-      <h2>🥁 Drum machine — 16-step loop <span id="drumStepRead">Step 1</span></h2>
-      <div class="hint" style="margin-top:0">Tap cells to loop a pattern. It loops every 4 beats at the song tempo. Drums have their own mixer strip (in the faders above, plus pattern presets below).</div>
+      <h2 data-tip="Tap cells to loop a pattern. It loops every 4 beats at the song tempo. Drums have their own mixer strip (in the faders above, plus pattern presets below).">🥁 Drum machine — 16-step loop <span id="drumStepRead">Step 1</span></h2>
       <div id="drumGrid" class="seqGrid"></div>
       <div class="toolrow">
         <button data-drumpreset="chill" class="active">Chill</button><button data-drumpreset="pulse">Pulse</button><button data-drumpreset="sparse">Sparse</button><button data-drumpreset="clear">Clear</button>
@@ -383,8 +381,7 @@ footer{color:var(--muted);font-size:12px;line-height:1.6;margin-top:14px}
     </section>
 
     <section class="card">
-      <h2>🎹 Piano roll — looping melody <span>16 steps</span></h2>
-      <div class="hint" style="margin-top:0">Tap notes in. Rows are scale degrees (top = high). The loop plays every 4 beats and follows the current key &amp; scale.</div>
+      <h2 data-tip="Tap notes in. Rows are scale degrees (top = high). The loop plays every 4 beats and follows the current key &amp; scale.">🎹 Piano roll — looping melody <span>16 steps</span></h2>
       <div id="rollGrid" class="rollGrid"></div>
       <div class="toolrow">
         <span style="font-size:13px;color:var(--muted)">Play roll on:</span>
@@ -397,19 +394,16 @@ footer{color:var(--muted);font-size:12px;line-height:1.6;margin-top:14px}
 
   <div class="sectionGrid">
     <section class="card">
-      <h2>〰️ Theremin — touch &amp; gesture instrument</h2>
-      <div class="hint" style="margin-top:0">Press and move inside the pad: <b>↔ pitch</b>, <b>↕ volume &amp; brightness</b>. Release and it fades like a real theremin. Works with mouse, touch, and the camera conductor below.</div>
+      <h2 data-tip="Press and move inside the pad: ↔ pitch, ↕ volume &amp; brightness. Release and it fades like a real theremin. Works with mouse, touch, and the camera conductor below. Tip: move slowly for glissando, shake slightly for vibrato.">〰️ Theremin — touch &amp; gesture instrument</h2>
       <div class="theremin" id="theremin"><div class="tdot" id="thereminDot" style="left:50%;top:50%"></div><div class="wave"><span>LOW</span><span id="thereminRead">— Hz · silent</span><span>HIGH</span></div></div>
       <div class="toolrow">
         <button id="thereminQuant" class="active">Snap to scale: On</button>
         <select id="thereminWave"><option value="sine">Sine — classic</option><option value="triangle">Triangle</option><option value="sawtooth">Saw (filtered)</option></select>
-        <span style="font-size:12px;color:var(--muted)">Tip: move slowly for glissando, shake slightly for vibrato.</span>
       </div>
     </section>
 
     <section class="card">
-      <h2>🎥 Conductor cam — webcam hands &amp; face</h2>
-      <div class="hint" style="margin-top:0">Conduct like an orchestra: <b>right hand beats time</b>, <b>left hand shapes volume</b>, <b>head nods cue accents</b>. Based on real conducting patterns — 4/4 is <b>down → left → right → up</b>, 3/4 is <b>down → right → up</b>.</div>
+      <h2 data-tip="Conduct like an orchestra: right hand beats time, left hand shapes volume, head nods cue accents. Based on real conducting patterns — 4/4 is down → left → right → up, 3/4 is down → right → up.">🎥 Conductor cam — webcam hands &amp; face</h2>
       <div class="camwrap"><video id="camVideo" autoplay playsinline muted></video><canvas id="camCanvas" width="320" height="240"></canvas><div id="camPlaceholder" style="position:absolute;inset:0;display:grid;place-items:center;color:#fff;background:#1a221d;text-align:center;padding:16px;font-size:13px;line-height:1.5">Camera is off<br><span style="color:#9db0a4">Your video stays on this device — nothing is recorded or sent anywhere.</span></div></div>
       <div class="toolrow">
         <button id="camStart">▶ Start camera</button><button id="camStop">Stop</button>
@@ -417,7 +411,7 @@ footer{color:var(--muted);font-size:12px;line-height:1.6;margin-top:14px}
         <span class="pill mono" id="camStatus">Off</span>
       </div>
       <div class="conduct">
-        <div><div class="beatmap" id="beatMap"></div><div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px">Conducting pattern</div></div>
+        <div><div class="beatmap" id="beatMap"></div><div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px" data-tip="How it reads you: motion tracking finds your moving hand (bright dot) and face region (box). A sharp downward flick = downbeat accent (kick + swell), raising both hands / large motion = crescendo, holding still = diminuendo, head nod = cue. Hand height drives expression volume, side-to-side drives brightness — just like a conductor's left hand shapes phrasing while the right keeps time. If your browser supports face detection it is used when available; otherwise face motion in the upper frame is tracked. Deny camera and everything else still works by touch.">Conducting pattern</div></div>
         <div class="readgrid">
           <div><b>Right hand · beat</b><span id="readHand">—</span></div>
           <div><b>Expression · height</b><span id="readExpr">—</span></div>
@@ -425,11 +419,9 @@ footer{color:var(--muted);font-size:12px;line-height:1.6;margin-top:14px}
           <div><b>Gesture</b><span id="readGesture">—</span></div>
         </div>
       </div>
-      <div class="hint">How it reads you: motion tracking finds your moving hand (bright dot) and face region (box). A sharp <b>downward flick = downbeat accent</b> (kick + swell), <b>raising both / large motion = crescendo</b>, <b>holding still = diminuendo</b>, <b>head nod = cue</b>. Hand height drives expression volume, side-to-side drives brightness — just like a conductor's left hand shapes phrasing while the right keeps time. If your browser supports face detection it is used when available; otherwise face motion in the upper frame is tracked. Deny camera and everything else still works by touch.</div>
     </section>
   </div>
 
-  <footer>Every note is synthesised in your browser with the Web Audio API — chords evolve bar by bar, melodies wander and vary, and each loop returns to its first chord so it can run indefinitely. Key, tempo and time-signature changes land on the next bar, so the music never stutters.</footer>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -1414,7 +1406,7 @@ scrim.addEventListener("click",function(){ if(focused) setFocus(focused,false); 
 document.addEventListener("keydown",function(e){ if(e.key==="Escape"&&focused) setFocus(focused,false); });
 /* Expand all / Collapse all bar above the board */
 var bar=document.createElement("div"); bar.className="panelBar";
-var lab=document.createElement("span"); lab.textContent="Panels — ▾ collapse · ⤢ opens one on its own:";
+var lab=document.createElement("span"); lab.textContent="Panels — ? explains a panel · ▾ collapse · ⤢ opens one on its own:";
 var ex=document.createElement("button"); ex.textContent="Expand all";
 var co=document.createElement("button"); co.textContent="Collapse all";
 bar.appendChild(lab); bar.appendChild(ex); bar.appendChild(co);
@@ -1422,6 +1414,67 @@ var board=document.querySelector(".board");
 if(board&&board.parentNode) board.parentNode.insertBefore(bar,board);
 ex.onclick=function(){ document.querySelectorAll(".card.collapsed").forEach(function(c){ c.classList.remove("collapsed"); if(c.__collapseBtn){ c.__collapseBtn.textContent="▾"; c.__collapseBtn.title="Collapse panel"; } }); refit(); };
 co.onclick=function(){ if(focused) setFocus(focused,false); document.querySelectorAll(".card").forEach(function(c){ c.classList.add("collapsed"); if(c.__collapseBtn){ c.__collapseBtn.textContent="▸"; c.__collapseBtn.title="Expand panel"; } }); refit(); };
+})();
+</script>
+<script>
+(function(){
+"use strict";
+/* Description tooltips: every section/element description lives behind the
+   small faded ? in its title. Tap the ? (or hover / focus it on desktop) to
+   pop the text up as an overlay; tap elsewhere, scroll, press Esc or the ✕
+   to dismiss. The ? is a separate button, so panel Collapse / Focus and all
+   other controls are untouched. */
+var pop=document.createElement("div"); pop.className="tipPop"; pop.setAttribute("role","tooltip");
+var popText=document.createElement("span");
+var popClose=document.createElement("button"); popClose.className="tipClose"; popClose.type="button"; popClose.textContent="✕"; popClose.setAttribute("aria-label","Close hint");
+pop.appendChild(popText); pop.appendChild(popClose); document.body.appendChild(pop);
+var anchor=null, pinned=false;
+function place(){
+  if(!anchor) return;
+  var r=anchor.getBoundingClientRect();
+  var pw=pop.offsetWidth, ph=pop.offsetHeight;
+  var left=Math.min(Math.max(8, r.left + r.width/2 - pw/2), Math.max(8, window.innerWidth - pw - 8));
+  var top=r.bottom + 8;
+  if(top + ph > window.innerHeight - 8) top = r.top - ph - 8;
+  if(top < 8) top = Math.max(8, Math.min(window.innerHeight - ph - 8, r.bottom + 8));
+  pop.style.left=left+"px"; pop.style.top=top+"px";
+}
+function show(btn,text,pin){
+  if(anchor===btn && pop.classList.contains("show")){ if(pin) pinned=true; place(); return; }
+  hide();
+  anchor=btn; pinned=!!pin; popText.textContent=text;
+  pop.classList.add("show"); btn.classList.add("on");
+  place();
+}
+function hide(){
+  pop.classList.remove("show");
+  if(anchor) anchor.classList.remove("on");
+  anchor=null; pinned=false;
+}
+popClose.addEventListener("click",function(e){ e.stopPropagation(); hide(); });
+document.querySelectorAll("[data-tip]").forEach(function(el){
+  var b=document.createElement("button");
+  b.type="button"; b.className="qmark"; b.textContent="?";
+  b.setAttribute("aria-label","Show description");
+  var tools=null;
+  if(el.tagName==="H2"){ var card=el.closest(".card"); if(card) tools=card.querySelector(".panelTools"); }
+  if(tools) tools.insertBefore(b, tools.firstChild); else el.appendChild(b);
+  var text=el.getAttribute("data-tip");
+  b.addEventListener("click",function(e){ e.stopPropagation(); if(anchor===b && pinned) hide(); else show(b,text,true); });
+  b.addEventListener("mouseenter",function(){ show(b,text,false); });
+  b.addEventListener("mouseleave",function(){ if(anchor===b && !pinned) hide(); });
+  b.addEventListener("focus",function(){ show(b,text,false); });
+  b.addEventListener("blur",function(){ if(anchor===b && !pinned) hide(); });
+});
+document.addEventListener("pointerdown",function(e){
+  if(!pop.classList.contains("show")) return;
+  if(pop.contains(e.target)) return;
+  if(anchor && anchor.contains(e.target)) return;
+  hide();
+},true);
+document.addEventListener("keydown",function(e){ if(e.key==="Escape") hide(); });
+window.addEventListener("scroll",function(){ if(pop.classList.contains("show")) place(); },{passive:true});
+window.addEventListener("resize",function(){ if(pop.classList.contains("show")) place(); });
 })();
 </script>
 </body>
